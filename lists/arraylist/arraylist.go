@@ -11,6 +11,7 @@ package arraylist
 
 import (
 	"fmt"
+	"github.com/emirpasic/gods/utils"
 	"reflect"
 	"strings"
 )
@@ -35,7 +36,7 @@ func NewEmpty[T any]() *List[T] {
 }
 
 // New instantiates a new list and adds the passed values, if any, to the list
-func New[T any](values ...T) *List[T] {
+func New[T any | *any | interface{}](values ...T) *List[T] {
 	list := &List[T]{}
 	if len(values) > 0 {
 		list.Add(values...)
@@ -145,12 +146,12 @@ func (list *List[T]) Clear() {
 }
 
 // Sort sorts values (in-place) using.
-//func (list *List[T]) Sort(comparator utils.Comparator) {
-//	if len(list.elements) < 2 {
-//		return
-//	}
-//	utils.Sort(list.elements[:list.size], comparator)
-//}
+func (list *List[T]) Sort(comparator utils.Comparator) {
+	if len(list.elements) < 2 {
+		return
+	}
+	utils.Sort(list.elements[:list.size], comparator)
+}
 
 // Swap swaps the two values at the specified positions.
 func (list *List[T]) Swap(i, j int) {
