@@ -11,6 +11,7 @@ package arraylist
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -18,8 +19,8 @@ import (
 //var _ lists.List = (*List)(nil)
 
 // List holds the elements in a slice
-type List[T any] struct {
-	elements []*T
+type List[T any | *any] struct {
+	elements []T
 	size     int
 }
 
@@ -34,7 +35,7 @@ func NewEmpty[T any]() *List[T] {
 }
 
 // New instantiates a new list and adds the passed values, if any, to the list
-func New[T any](values ...*T) *List[T] {
+func New[T any](values ...T) *List[T] {
 	list := &List[T]{}
 	if len(values) > 0 {
 		list.Add(values...)
@@ -42,14 +43,14 @@ func New[T any](values ...*T) *List[T] {
 	return list
 }
 
-func (list *List[T]) ForEach(f func(e *T)) {
+func (list *List[T]) ForEach(f func(e T)) {
 	for _, el := range list.elements {
 		f(el)
 	}
 }
 
 // Add appends a value at the end of the list
-func (list *List[T]) Add(values ...*T) {
+func (list *List[T]) Add(values ...T) {
 	list.growBy(len(values))
 	for _, value := range values {
 		list.elements[list.size] = value
@@ -59,10 +60,11 @@ func (list *List[T]) Add(values ...*T) {
 
 // Get returns the element at index.
 // Second return parameter is true if index is within bounds of the array and array is not empty, otherwise false.
-func (list *List[T]) Get(index int) (*T, bool) {
+func (list *List[T]) Get(index int) (T, bool) {
 
 	if !list.withinRange(index) {
-		return nil, false
+		var none T
+		return none, false
 	}
 	return list.elements[index], true
 }
@@ -73,7 +75,7 @@ func (list *List[T]) Remove(index int) {
 	if !list.withinRange(index) {
 		return
 	}
-	var element *T
+	var element T
 	list.elements[index] = element                                // cleanup reference
 	copy(list.elements[index:], list.elements[index+1:list.size]) // shift to the left by one (slow operation, need ways to optimize this)
 	list.size--
@@ -85,12 +87,12 @@ func (list *List[T]) Remove(index int) {
 // All elements have to be present in the set for the method to return true.
 // Performance time complexity of n^2.
 // Returns true if no arguments are passed at all, i.e. set is always super-set of empty set.
-func (list *List[T]) Contains(values ...*T) bool {
+func (list *List[T]) Contains(values ...T) bool {
 
 	for _, searchValue := range values {
 		found := false
 		for index := 0; index < list.size; index++ {
-			if list.elements[index] == searchValue {
+			if reflect.DeepEqual(list.elements[index], searchValue) {
 				found = true
 				break
 			}
@@ -103,19 +105,23 @@ func (list *List[T]) Contains(values ...*T) bool {
 }
 
 // Values returns all elements in the list.
-func (list *List[T]) Values() []*T {
-	newElements := make([]*T, list.size, list.size)
+func (list *List[T]) Values() []T {
+	newElements := make([]T, list.size, list.size)
 	copy(newElements, list.elements[:list.size])
 	return newElements
 }
 
+func Compare[T comparable](v1, v2 T) bool {
+	return v1 == v2
+}
+
 // IndexOf returns index of provided element
-func (list *List[T]) IndexOf(value *T) int {
+func (list *List[T]) IndexOf(value T) int {
 	if list.size == 0 {
 		return -1
 	}
 	for index, element := range list.elements {
-		if element == value {
+		if reflect.DeepEqual(element, value) {
 			return index
 		}
 	}
@@ -135,7 +141,7 @@ func (list *List[T]) Size() int {
 // Clear removes all elements from the list.
 func (list *List[T]) Clear() {
 	list.size = 0
-	list.elements = []*T{}
+	list.elements = []T{}
 }
 
 // Sort sorts values (in-place) using.
@@ -156,7 +162,7 @@ func (list *List[T]) Swap(i, j int) {
 // Insert inserts values at specified index position shifting the value at that position (if any) and any subsequent elements to the right.
 // Does not do anything if position is negative or bigger than list's size
 // Note: position equal to list's size is valid, i.e. append.
-func (list *List[T]) Insert(index int, values ...*T) {
+func (list *List[T]) Insert(index int, values ...T) {
 
 	if !list.withinRange(index) {
 		// Append
@@ -176,7 +182,7 @@ func (list *List[T]) Insert(index int, values ...*T) {
 // Set the value at specified index
 // Does not do anything if position is negative or bigger than list's size
 // Note: position equal to list's size is valid, i.e. append.
-func (list *List[T]) Set(index int, value *T) {
+func (list *List[T]) Set(index int, value T) {
 
 	if !list.withinRange(index) {
 		// Append
@@ -206,7 +212,7 @@ func (list *List[T]) withinRange(index int) bool {
 }
 
 func (list *List[T]) resize(cap int) {
-	newElements := make([]*T, cap, cap)
+	newElements := make([]T, cap, cap)
 	copy(newElements, list.elements)
 	list.elements = newElements
 }

@@ -41,7 +41,7 @@ func (iterator *Iterator[T]) Prev() bool {
 
 // Value returns the current element's value.
 // Does not modify the state of the iterator.
-func (iterator *Iterator[T]) Value() *T {
+func (iterator *Iterator[T]) Value() T {
 	return iterator.list.elements[iterator.index]
 }
 

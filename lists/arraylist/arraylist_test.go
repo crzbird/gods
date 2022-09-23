@@ -801,19 +801,15 @@ import (
 //}
 
 func TestList_Add(t *testing.T) {
-	list := NewEmpty[User]()
-	list.Add(&User{Name: "adfs"})
-	user, exist := list.Get(0)
-	name := user.Name
-	fmt.Println(name, exist)
-	get, b := list.Get(2)
+	list := New[*User]()
+	list.Add(&User{Name: "a"}, &User{Name: "b"})
+	get, b := list.Get(0)
 	fmt.Println(get, b)
-	contains := list.Contains(user)
+	contains := list.Contains(&User{Name: "a"})
 	fmt.Println(contains)
-	list.ForEach(func(e *User) {
-		fmt.Println(e.Name)
-	})
 }
+
+type Integer int
 
 type Addr struct {
 	Name string

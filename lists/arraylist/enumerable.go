@@ -17,7 +17,7 @@ func (list *List[T]) Each(f func(index int, value interface{})) {
 
 // Map invokes the given function once for each element and returns a
 // container containing the values returned by the given function.
-func (list *List[T]) Map(f func(index int, value *T) *T) *List[T] {
+func (list *List[T]) Map(f func(index int, value T) T) *List[T] {
 	newList := &List[T]{}
 	iterator := list.Iterator()
 	for iterator.Next() {
@@ -27,7 +27,7 @@ func (list *List[T]) Map(f func(index int, value *T) *T) *List[T] {
 }
 
 // Select returns a new container containing all elements for which the given function returns a true value.
-func (list *List[T]) Select(f func(index int, value *T) bool) *List[T] {
+func (list *List[T]) Select(f func(index int, value T) bool) *List[T] {
 	newList := &List[T]{}
 	iterator := list.Iterator()
 	for iterator.Next() {
